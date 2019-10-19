@@ -15,11 +15,11 @@ object UserController extends Controller {
     import dsl._
 
     HttpRoutes.of[F] {
-      case req @ POST -> Root / USERS =>
+      case req @ POST -> Root / USERS / REGISTER =>
         for {
           loginDto <- req.as[LoginDto]
           _        <- Sync[F].delay(println(s".........>>>loginDto=$loginDto"))
-          resp     <- Ok("")
+          resp     <- Ok("111")
         } yield resp
     }
   }

@@ -9,17 +9,21 @@ object UserValidator {
 
   type ValidationResult[A] = ValidatedNec[DomainValidation, A]
 
-  def validateUser(email: String, password: String, firstName: String, lastName: String): ValidationResult[User] =
+  def validateUser(
+      email: String,
+      password: String,
+      firstName: String,
+      lastName: String,
+      cellPhone: Option[String]): ValidationResult[User] =
     (validateEmail(email), validatePassword(password), validateFirstName(firstName), validateLastName(lastName))
       .mapN((validatedEmail, validatedPassword, validatedFirstName, validatedLastName) =>
-        User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName))
+        User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName, cellPhone))
 
   private def validateEmail(userName: String): ValidationResult[String] =
     if (userName.nonEmpty) userName.validNec else UsernameHasSpecialCharacters.invalidNec
 
   private def validatePassword(password: String): ValidationResult[String] =
-    if (password.matches("(?=^.{10,}$)((?=.*\\d)|(?=.*\\W+))(?![.\\n])(?=.*[A-Z])(?=.*[a-z]).*$")) password.validNec
-    else PasswordDoesNotMeetCriteria.invalidNec
+    if (password.nonEmpty) password.validNec else PasswordDoesNotMeetCriteria.invalidNec
 
   private def validateFirstName(firstName: String): ValidationResult[String] =
     if (firstName.matches("^[a-zA-Z]+$")) firstName.validNec else FirstNameHasSpecialCharacters.invalidNec

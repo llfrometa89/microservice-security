@@ -1,8 +1,7 @@
 package io.github.llfrometa89.infrastructure.configurations
 
-import cats.effect.{IO, LiftIO, Sync}
+import cats.effect.Sync
 import cats.implicits._
-import pureconfig.ConfigReader.Result
 import pureconfig._
 import pureconfig.generic.auto._
 
@@ -10,9 +9,12 @@ trait ConfigFactory[F[_]] {
   def build: F[Configuration]
 }
 
-trait PureConfigFactoryInstances {
+object ConfigFactory {
 
   def apply[F[_]](implicit F: ConfigFactory[F]): ConfigFactory[F] = F
+}
+
+trait PureConfigFactoryInstances {
 
   implicit def instanceConfigFactory[F[_]: Sync]: ConfigFactory[F] = new ConfigFactory[F] {
 
@@ -26,8 +28,10 @@ trait PureConfigFactoryInstances {
   }
 }
 
-case class Configuration(http: Http)
+case class Configuration(http: HttpConfig, aws: AwsConfig)
 
-case class Http(server: HttpServer)
+case class HttpConfig(server: HttpServerConfig)
+case class HttpServerConfig(host: String, port: Int)
 
-case class HttpServer(host: String, port: Int)
+case class AwsConfig(accessKey: String, secretKey: String, region: String, cognito: AwsCognitoConfig)
+case class AwsCognitoConfig(userPoolId: String)

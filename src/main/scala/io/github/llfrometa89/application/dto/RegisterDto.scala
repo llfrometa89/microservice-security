@@ -6,11 +6,9 @@ import io.circe.generic.semiauto.deriveDecoder
 import org.http4s.EntityDecoder
 import org.http4s.circe.jsonOf
 
-case class RegisterDto(email: String, password: String)
+case class RegisterDto(email: String, password: String, firstName: String, lastName: String)
 
 trait RegisterDtoInstances {
-  implicit val registerDecoder: Decoder[RegisterDto]                             = deriveDecoder[RegisterDto]
-  implicit def registerEentityDecoder[F[_]: Sync]: EntityDecoder[F, RegisterDto] = jsonOf
+  implicit val registerDecoder: Decoder[RegisterDto]                            = deriveDecoder[RegisterDto]
+  implicit def registerEntityDecoder[F[_]: Sync]: EntityDecoder[F, RegisterDto] = jsonOf
 }
-
-object RegisterDtoInstances extends RegisterDtoInstances

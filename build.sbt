@@ -1,39 +1,62 @@
+import Dependencies._
+
 name := "microservice-security"
 
 organization := "io.github.llfrometa89"
 
 version := "0.1.0"
 
-scalaVersion := "2.13.1"
+scalaVersion := "2.12.8"
 
-lazy val V = new {
-  val catsVersion       = "2.0.0"
-  val catsEffectVersion = "2.0.0"
-  val scalaTestVersion  = "3.2.0-M1"
-  val monocleVersion    = "2.0.0"
-  val scalaCheckVersion = "1.14.2"
-  val http4sVersion     = "0.21.0-M5"
-  val circeVersion      = "0.12.2"
-  val logbackVersion    = "1.2.3"
-  val awsSdkVersion     = "1.11.656"
-  val pureConfigVersion = "0.12.1"
-}
+lazy val commonScalacOptions = Seq(
+  "-deprecation",
+  "-encoding",
+  "UTF-8",
+  "-feature",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-language:implicitConversions",
+  "-language:experimental.macros",
+  "-Ypartial-unification",
+  "-unchecked",
+  "-Xfatal-warnings",
+  "-Xlint",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-value-discard",
+  "-Xfuture",
+  "-Xlog-reflective-calls",
+  "-Ywarn-inaccessible",
+  "-Ypatmat-exhaust-depth",
+  "20",
+  "-Ydelambdafy:method",
+  "-Xmax-classfile-name",
+  "100",
+  "-opt:l:inline",
+  "-opt-inline-from:**"
+)
 
 libraryDependencies ++= Seq(
-  "org.typelevel"              %% "cats-core"              % V.catsVersion,
-  "org.typelevel"              %% "cats-effect"            % V.catsEffectVersion,
-  "com.github.julien-truffaut" %% "monocle-core"           % V.monocleVersion,
-  "com.github.julien-truffaut" %% "monocle-macro"          % V.monocleVersion,
-  "org.http4s"                 %% "http4s-blaze-server"    % V.http4sVersion,
-  "org.http4s"                 %% "http4s-blaze-client"    % V.http4sVersion,
-  "org.http4s"                 %% "http4s-circe"           % V.http4sVersion,
-  "org.http4s"                 %% "http4s-dsl"             % V.http4sVersion,
-  "io.circe"                   %% "circe-generic"          % V.circeVersion,
-  "ch.qos.logback"             % "logback-classic"         % V.logbackVersion,
-  "com.amazonaws"              % "aws-java-sdk"            % V.awsSdkVersion,
-  "com.amazonaws"              % "aws-java-sdk-core"       % V.awsSdkVersion,
-  "com.amazonaws"              % "aws-java-sdk-cognitoidp" % V.awsSdkVersion,
-  "com.github.pureconfig"      %% "pureconfig"             % V.pureConfigVersion,
-  "org.scalatest"              %% "scalatest"              % V.scalaTestVersion % Test,
-  "org.scalacheck"             %% "scalacheck"             % V.scalaCheckVersion % Test
+  compilerPlugin(Libraries.kindProjector)
 )
+
+libraryDependencies ++= Seq(
+  Libraries.cats,
+  Libraries.catsEffect,
+  Libraries.monocleCore,
+  Libraries.monocleMacro,
+  Libraries.http4sBlazeServe,
+  Libraries.http4sBlazeClient,
+  Libraries.http4sCirce,
+  Libraries.http4sDsl,
+  Libraries.circeGeneric,
+  Libraries.logbackClassic,
+  Libraries.awsJavaSdk,
+  Libraries.awsJavaSdkCore,
+  Libraries.awsJavaSdkCognitoidp,
+  Libraries.pureConfig,
+  Libraries.scalaTest  % Test,
+  Libraries.scalaCheck % Test
+)
+
+scalacOptions ++= commonScalacOptions

@@ -29,14 +29,12 @@ trait UserCognitoGatewayInstances {
     final val MESSAGE_ACTION_VALUE         = "SUPPRESS"
 
     def register(user: User): F[User] = {
-      val computation = for {
-        config           <- ConfigFactory[F].build
-        client           <- clientBuilder(config.aws)
-        userReq          <- Sync[F].delay(userRequestBuilder(config.aws, user))
-        createUserResult <- Sync[F].delay(client.adminCreateUser(userReq))
-      } yield user
-
-      computation recoverWith {
+      (for {
+        config  <- ConfigFactory[F].build
+        client  <- clientBuilder(config.aws)
+        userReq <- Sync[F].delay(userRequestBuilder(config.aws, user))
+        _       <- Sync[F].delay(client.adminCreateUser(userReq))
+      } yield user).recoverWith {
         case _: UsernameExistsException => Sync[F].raiseError(UserAlreadyExists(user.email))
         case error                      => Sync[F].raiseError(error)
       }

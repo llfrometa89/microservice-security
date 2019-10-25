@@ -2,7 +2,9 @@ package io.github.llfrometa89.infrastructure.configurations
 
 import cats.effect.Sync
 import cats.implicits._
+import io.github.llfrometa89.infrastructure.configurations.ConfigFactory.CanNotLoadResource
 import pureconfig._
+import pureconfig.error.ConfigReaderFailures
 import pureconfig.generic.auto._
 
 trait ConfigFactory[F[_]] {
@@ -12,6 +14,9 @@ trait ConfigFactory[F[_]] {
 object ConfigFactory {
 
   def apply[F[_]](implicit F: ConfigFactory[F]): ConfigFactory[F] = F
+
+  case object ConfigError                                    extends Exception
+  case class CanNotLoadResource(error: ConfigReaderFailures) extends Exception
 }
 
 trait PureConfigFactoryInstances {
@@ -21,9 +26,7 @@ trait PureConfigFactoryInstances {
     def build: F[Configuration] =
       ConfigSource.default.load[Configuration] match {
         case Right(value) => Sync[F].pure(value)
-        case Left(error) =>
-          println(s"........>error=$error")
-          Sync[F].raiseError(new Exception("error"))
+        case Left(error)  => Sync[F].raiseError(CanNotLoadResource(error))
       }
   }
 }

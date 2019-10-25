@@ -44,9 +44,7 @@ trait UserServiceInstances {
           registerDto.cellPhone)
         .toEither match {
         case Right(value) => Sync[F].pure(value)
-        case Left(errors) =>
-          println(s"-----------validateUser::errors=$errors")
-          Sync[F].raiseError(ValidationError(errors.toList))
+        case Left(errors) => Sync[F].raiseError(ValidationError(errors.toList))
       }
     }
   }

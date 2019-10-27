@@ -1,7 +1,6 @@
 package io.github.llfrometa89.infrastructure.configurations
 
 import cats.effect.Sync
-import cats.implicits._
 import io.github.llfrometa89.infrastructure.configurations.ConfigFactory.CanNotLoadResource
 import pureconfig._
 import pureconfig.error.ConfigReaderFailures

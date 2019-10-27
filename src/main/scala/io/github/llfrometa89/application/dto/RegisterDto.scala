@@ -8,7 +8,7 @@ import org.http4s.circe.jsonOf
 
 case class RegisterDto(email: String, password: String, firstName: String, lastName: String, cellPhone: Option[String])
 
-trait RegisterDtoInstances {
+object RegisterDto {
   implicit val registerDecoder: Decoder[RegisterDto]                            = deriveDecoder[RegisterDto]
   implicit def registerEntityDecoder[F[_]: Sync]: EntityDecoder[F, RegisterDto] = jsonOf
 }

@@ -4,6 +4,7 @@ import io.github.llfrometa89.domain.models.User
 import cats.implicits._
 import cats.data._
 import cats.data.Validated._
+import io.github.llfrometa89.domain.models.User.DomainValidation
 
 object UserValidator {
 
@@ -31,11 +32,6 @@ object UserValidator {
   private def validateLastName(lastName: String): ValidationResult[String] =
     if (lastName.matches("^[a-zA-Z]+$")) lastName.validNec else LastNameHasSpecialCharacters.invalidNec
 
-}
-
-sealed trait DomainValidation {
-  def errorMessage: String
-  def errorCode: String
 }
 
 case object UsernameHasSpecialCharacters extends DomainValidation {

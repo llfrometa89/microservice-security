@@ -37,12 +37,14 @@ lazy val commonScalacOptions = Seq(
 )
 
 libraryDependencies ++= Seq(
-  compilerPlugin(Libraries.kindProjector)
+  compilerPlugin(Libraries.kindProjector),
+  compilerPlugin(Libraries.betterMonadicFor)
 )
 
 libraryDependencies ++= Seq(
   Libraries.cats,
   Libraries.catsEffect,
+  Libraries.catsMeowMtl,
   Libraries.monocleCore,
   Libraries.monocleMacro,
   Libraries.http4sBlazeServe,
@@ -50,6 +52,7 @@ libraryDependencies ++= Seq(
   Libraries.http4sCirce,
   Libraries.http4sDsl,
   Libraries.circeGeneric,
+  Libraries.circeParser,
   Libraries.logbackClassic,
   Libraries.awsJavaSdk,
   Libraries.awsJavaSdkCore,

@@ -4,9 +4,10 @@ import cats.implicits._
 import cats.effect.Sync
 import io.github.llfrometa89.application.dto.RegisterDto
 import io.github.llfrometa89.domain.gateways.UserGateway
+import io.github.llfrometa89.domain.models.User.UserValidationError
 import io.github.llfrometa89.domain.models.{User, UserProfile}
 import io.github.llfrometa89.domain.repositories.UserProfileRepository
-import io.github.llfrometa89.domain.validators.{DomainValidation, UserValidator}
+import io.github.llfrometa89.domain.validators.UserValidator
 
 trait UserService[F[_]] {
 
@@ -15,15 +16,11 @@ trait UserService[F[_]] {
 
 object UserService {
 
-  def apply[F[_]](implicit F: UserService[F]): UserService[F] = F
-
-  case class ValidationError(list: List[DomainValidation]) extends Exception
+  def apply[F[_]](implicit ev: UserService[F]): UserService[F] = ev
 
 }
 
 trait UserServiceInstances {
-
-  import UserService._
 
   implicit def instanceUserService[F[_]: Sync: UserProfileRepository: UserGateway] = new UserService[F] {
 
@@ -44,8 +41,10 @@ trait UserServiceInstances {
           registerDto.cellPhone)
         .toEither match {
         case Right(value) => Sync[F].pure(value)
-        case Left(errors) => Sync[F].raiseError(ValidationError(errors.toList))
+        case Left(errors) => Sync[F].raiseError(UserValidationError(errors.toList))
       }
     }
   }
 }
+
+object UserServiceInstances extends UserServiceInstances

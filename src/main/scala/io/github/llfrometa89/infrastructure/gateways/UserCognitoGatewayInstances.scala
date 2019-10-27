@@ -6,9 +6,10 @@ import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.services.cognitoidp.model._
 import com.amazonaws.services.cognitoidp.{AWSCognitoIdentityProvider, AWSCognitoIdentityProviderClientBuilder}
 import io.github.llfrometa89.domain.gateways.UserGateway
-import io.github.llfrometa89.domain.models.User.UserAlreadyExists
+import io.github.llfrometa89.domain.models.User.{UserAlreadyExists, UserNotAuthorized}
 import io.github.llfrometa89.domain.models.{Session, User}
 import io.github.llfrometa89.infrastructure.configurations.{AwsConfig, ConfigFactory}
+import com.amazonaws.services.cognitoidp.model.NotAuthorizedException
 
 import scala.collection.JavaConverters._
 
@@ -41,55 +42,18 @@ trait UserCognitoGatewayInstances {
       }
     }
 
-    private def authRequestBuilder(username: String, password: String): F[AdminInitiateAuthRequest] =
-      Sync[F].delay(
-        new AdminInitiateAuthRequest()
-          .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
-          .withClientId("5qc9n0r5ebrqm6cmdr7hte9shl")
-          .withUserPoolId("us-east-2_GvQE7tm2r")
-          .withAuthParameters(Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password).asJava))
-
-    private def authChallengeRequestBuilder(
-        username: String,
-        password: String,
-        authResp: AdminInitiateAuthResult): F[AdminRespondToAuthChallengeRequest] = {
-      Sync[F].delay(
-        new AdminRespondToAuthChallengeRequest()
-          .withChallengeName(ChallengeNameType.NEW_PASSWORD_REQUIRED)
-          .withChallengeResponses(
-            Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password, NEW_PASSWORD_FIELD -> password).asJava)
-          .withClientId("5qc9n0r5ebrqm6cmdr7hte9shl")
-          .withUserPoolId("us-east-2_GvQE7tm2r")
-          .withSession(authResp.getSession))
-    }
-
     def login(username: String, password: String): F[Session] = {
-
-      for {
+      val computation = for {
         config           <- ConfigFactory[F].build
         client           <- clientBuilder(config.aws)
-        authReq          <- authRequestBuilder(username, password)
+        authReq          <- authRequestBuilder(username, password, config.aws)
         authResp         <- Sync[F].delay(client.adminInitiateAuth(authReq))
-        _                <- Sync[F].delay(println(s"----->> getChallengeName => ${authResp.getChallengeName}"))
-        authChallengeReq <- authChallengeRequestBuilder(username, password, authResp)
+        authChallengeReq <- authChallengeRequestBuilder(username, password, authResp, config.aws)
         authResult <- Sync[F]
           .pure(authResp.getChallengeName == NEW_PASSWORD_REQUIRED_CHALLENGE_NAME)
           .ifM(
             Sync[F].delay(client.adminRespondToAuthChallenge(authChallengeReq).getAuthenticationResult),
             Sync[F].pure(authResp.getAuthenticationResult))
-
-        _ <- Sync[F].delay(
-          println(s"----->> AuthenticationResultType::getAccessToken       => ${authResult.getAccessToken}"))
-        _ <- Sync[F].delay(
-          println(s"----->> AuthenticationResultType::getRefreshToken      => ${authResult.getRefreshToken}"))
-        _ <- Sync[F].delay(
-          println(s"----->> AuthenticationResultType::getTokenType         => ${authResult.getTokenType}"))
-        _ <- Sync[F].delay(
-          println(s"----->> AuthenticationResultType::getIdToken           => ${authResult.getIdToken}"))
-
-        _ <- Sync[F].delay(
-          println(s"----->> AuthenticationResultType::getNewDeviceMetadata => ${authResult.getNewDeviceMetadata}"))
-
       } yield
         Session(
           authResult.getAccessToken,
@@ -97,6 +61,34 @@ trait UserCognitoGatewayInstances {
           username,
           authResult.getTokenType,
           authResult.getExpiresIn.toLong)
+
+      computation.recoverWith {
+        case _: NotAuthorizedException => Sync[F].raiseError(UserNotAuthorized(username))
+        case error                     => Sync[F].raiseError(error)
+      }
+    }
+
+    private def authRequestBuilder(username: String, password: String, config: AwsConfig): F[AdminInitiateAuthRequest] =
+      Sync[F].delay(
+        new AdminInitiateAuthRequest()
+          .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+          .withClientId(config.cognito.appClientId)
+          .withUserPoolId(config.cognito.userPoolId)
+          .withAuthParameters(Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password).asJava))
+
+    private def authChallengeRequestBuilder(
+        username: String,
+        password: String,
+        authResp: AdminInitiateAuthResult,
+        config: AwsConfig): F[AdminRespondToAuthChallengeRequest] = {
+      Sync[F].delay(
+        new AdminRespondToAuthChallengeRequest()
+          .withChallengeName(ChallengeNameType.NEW_PASSWORD_REQUIRED)
+          .withChallengeResponses(
+            Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password, NEW_PASSWORD_FIELD -> password).asJava)
+          .withClientId(config.cognito.appClientId)
+          .withUserPoolId(config.cognito.userPoolId)
+          .withSession(authResp.getSession))
     }
 
     private def clientBuilder(config: AwsConfig): F[AWSCognitoIdentityProvider] = {

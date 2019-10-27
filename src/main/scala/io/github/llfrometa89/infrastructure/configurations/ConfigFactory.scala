@@ -36,4 +36,4 @@ case class HttpConfig(server: HttpServerConfig)
 case class HttpServerConfig(host: String, port: Int)
 
 case class AwsConfig(accessKey: String, secretKey: String, region: String, cognito: AwsCognitoConfig)
-case class AwsCognitoConfig(userPoolId: String)
+case class AwsCognitoConfig(userPoolId: String, appClientId: String)

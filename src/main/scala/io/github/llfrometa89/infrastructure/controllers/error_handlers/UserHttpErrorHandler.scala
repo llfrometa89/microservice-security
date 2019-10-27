@@ -1,7 +1,13 @@
 package io.github.llfrometa89.infrastructure.controllers.error_handlers
 
 import cats.MonadError
-import io.github.llfrometa89.domain.models.User.{UserAlreadyExists, UserError, UserNotFound, UserValidationError}
+import io.github.llfrometa89.domain.models.User.{
+  UserAlreadyExists,
+  UserError,
+  UserNotAuthorized,
+  UserNotFound,
+  UserValidationError
+}
 import org.http4s.Response
 import io.github.llfrometa89.infrastructure.controllers.http.{
   BaseMessageResponse,
@@ -29,6 +35,10 @@ object UserHttpErrorHandler {
         case UserValidationError(list) =>
           BadRequest(BaseMessageResponse(MessageResponse(linkedMessages = list.map(dv =>
             LinkedMessage(dv.errorCode, dv.errorMessage)))))
+        case error @ UserNotAuthorized(username) =>
+          BadRequest( //TODO Unauthorized
+            BaseMessageResponse(MessageResponse(
+              errorMessages = List(ErrorMessage(error.productPrefix, s"Incorrect username[$username] or password ")))))
       }
     }
 }

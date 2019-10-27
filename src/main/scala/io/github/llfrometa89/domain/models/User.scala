@@ -20,6 +20,7 @@ object User {
   sealed abstract class UserError(message: String = "")        extends Exception(message)
   case class UserAlreadyExists(email: String)                  extends UserError(email)
   case class UserNotFound(username: String)                    extends UserError(username)
+  case class UserNotAuthorized(username: String)               extends UserError(username)
   case class UserValidationError(list: List[DomainValidation]) extends UserError
 
   //Validation Messages

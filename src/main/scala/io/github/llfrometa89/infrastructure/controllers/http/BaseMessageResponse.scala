@@ -24,12 +24,12 @@ case class MessageResponse(
     warningMessages: List[WarningMessage] = List.empty[WarningMessage],
     linkedMessages: List[LinkedMessage] = List.empty[LinkedMessage])
 
+case class BaseMessageResponse(messages: MessageResponse)
+
 object MessageResponse {
   implicit val mrE: Encoder[MessageResponse]                       = deriveEncoder[MessageResponse]
   implicit def meEE[F[_]: Sync]: EntityEncoder[F, MessageResponse] = jsonEncoderOf
 }
-
-case class BaseMessageResponse(messages: MessageResponse)
 
 object BaseMessageResponse {
   implicit val brE: Encoder[BaseMessageResponse]                              = deriveEncoder[BaseMessageResponse]
@@ -41,11 +41,13 @@ object GenericMessageDerivation {
   implicit val encodeEvent: Encoder[Message] = Encoder.instance {
     case error: ErrorMessage     => error.asJson
     case warning: WarningMessage => warning.asJson
+    case linked: LinkedMessage   => linked.asJson
   }
 
   implicit val decodeEvent: Decoder[Message] =
     List[Decoder[Message]](
       Decoder[ErrorMessage].widen,
-      Decoder[WarningMessage].widen
+      Decoder[WarningMessage].widen,
+      Decoder[LinkedMessage].widen
     ).reduceLeft(_ or _)
 }

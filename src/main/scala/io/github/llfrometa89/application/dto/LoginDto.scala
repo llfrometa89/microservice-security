@@ -8,9 +8,7 @@ import org.http4s.circe.jsonOf
 
 case class LoginDto(email: String, password: String)
 
-trait LoginDtoInstances {
-  implicit val loginEncoder: Decoder[LoginDto]                            = deriveDecoder[LoginDto]
+object LoginDto {
+  implicit val loginDecoder: Decoder[LoginDto]                            = deriveDecoder[LoginDto]
   implicit def loginEntityDecoder[F[_]: Sync]: EntityDecoder[F, LoginDto] = jsonOf
 }
-
-object LoginDtoInstances extends LoginDtoInstances

@@ -2,7 +2,7 @@ package io.github.llfrometa89.application.services
 
 import cats.implicits._
 import cats.effect.Sync
-import io.github.llfrometa89.application.dto.RegisterDto
+import io.github.llfrometa89.application.dto.{LoginDto, RegisterDto, SessionDto}
 import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.models.User.UserValidationError
 import io.github.llfrometa89.domain.models.{User, UserProfile}
@@ -10,6 +10,8 @@ import io.github.llfrometa89.domain.repositories.UserProfileRepository
 import io.github.llfrometa89.domain.validators.UserValidator
 
 trait UserService[F[_]] {
+
+  def login(loginData: LoginDto): F[SessionDto]
 
   def register(registerDto: RegisterDto): F[String]
 }
@@ -23,6 +25,9 @@ object UserService {
 trait UserServiceInstances {
 
   implicit def instanceUserService[F[_]: Sync: UserProfileRepository: UserGateway] = new UserService[F] {
+
+    override def login(loginData: LoginDto): F[SessionDto] =
+      UserGateway[F].login(loginData.email, loginData.password).map(SessionDto.fromSession)
 
     def register(registerDto: RegisterDto): F[String] =
       for {

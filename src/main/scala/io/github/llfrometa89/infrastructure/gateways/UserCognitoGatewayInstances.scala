@@ -3,41 +3,100 @@ package io.github.llfrometa89.infrastructure.gateways
 import cats.effect.Sync
 import cats.implicits._
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.services.cognitoidp.model.{
-  AdminCreateUserRequest,
-  AttributeType,
-  DeliveryMediumType,
-  UsernameExistsException
-}
+import com.amazonaws.services.cognitoidp.model._
 import com.amazonaws.services.cognitoidp.{AWSCognitoIdentityProvider, AWSCognitoIdentityProviderClientBuilder}
 import io.github.llfrometa89.domain.gateways.UserGateway
-import io.github.llfrometa89.domain.models.User
 import io.github.llfrometa89.domain.models.User.UserAlreadyExists
+import io.github.llfrometa89.domain.models.{Session, User}
 import io.github.llfrometa89.infrastructure.configurations.{AwsConfig, ConfigFactory}
+
+import scala.collection.JavaConverters._
 
 trait UserCognitoGatewayInstances {
 
   implicit def instanceUserGateway[F[_]: Sync: ConfigFactory] = new UserGateway[F] {
 
-    final val EMAIL_FIELD                  = "email"
-    final val NAME_FIELD                   = "name"
-    final val FAMILY_NAME_FIELD            = "family_name"
-    final val PHONE_NUMBER_FIELD           = "phone_number"
-    final val EMAIL_VERIFIED_FIELD         = "email_verified"
-    final val EMPTY                        = "email_verified"
-    final val DEFAULT_EMAIL_VERIFIED_VALUE = "true"
-    final val MESSAGE_ACTION_VALUE         = "SUPPRESS"
+    final val EMAIL_FIELD                          = "email"
+    final val NAME_FIELD                           = "name"
+    final val FAMILY_NAME_FIELD                    = "family_name"
+    final val PHONE_NUMBER_FIELD                   = "phone_number"
+    final val EMAIL_VERIFIED_FIELD                 = "email_verified"
+    final val EMPTY                                = "email_verified"
+    final val DEFAULT_EMAIL_VERIFIED_VALUE         = "true"
+    final val MESSAGE_ACTION_VALUE                 = "SUPPRESS"
+    final val USERNAME_FIELD                       = "USERNAME"
+    final val PASSWORD_FIELD                       = "PASSWORD"
+    final val NEW_PASSWORD_FIELD                   = "NEW_PASSWORD"
+    final val NEW_PASSWORD_REQUIRED_CHALLENGE_NAME = "NEW_PASSWORD_REQUIRED"
 
     def register(user: User): F[User] = {
       (for {
         config  <- ConfigFactory[F].build
         client  <- clientBuilder(config.aws)
-        userReq <- Sync[F].delay(userRequestBuilder(config.aws, user))
+        userReq <- userRequestBuilder(config.aws, user)
         _       <- Sync[F].delay(client.adminCreateUser(userReq))
       } yield user).recoverWith {
         case _: UsernameExistsException => Sync[F].raiseError(UserAlreadyExists(user.email))
         case error                      => Sync[F].raiseError(error)
       }
+    }
+
+    private def authRequestBuilder(username: String, password: String): F[AdminInitiateAuthRequest] =
+      Sync[F].delay(
+        new AdminInitiateAuthRequest()
+          .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
+          .withClientId("5qc9n0r5ebrqm6cmdr7hte9shl")
+          .withUserPoolId("us-east-2_GvQE7tm2r")
+          .withAuthParameters(Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password).asJava))
+
+    private def authChallengeRequestBuilder(
+        username: String,
+        password: String,
+        authResp: AdminInitiateAuthResult): F[AdminRespondToAuthChallengeRequest] = {
+      Sync[F].delay(
+        new AdminRespondToAuthChallengeRequest()
+          .withChallengeName(ChallengeNameType.NEW_PASSWORD_REQUIRED)
+          .withChallengeResponses(
+            Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password, NEW_PASSWORD_FIELD -> password).asJava)
+          .withClientId("5qc9n0r5ebrqm6cmdr7hte9shl")
+          .withUserPoolId("us-east-2_GvQE7tm2r")
+          .withSession(authResp.getSession))
+    }
+
+    def login(username: String, password: String): F[Session] = {
+
+      for {
+        config           <- ConfigFactory[F].build
+        client           <- clientBuilder(config.aws)
+        authReq          <- authRequestBuilder(username, password)
+        authResp         <- Sync[F].delay(client.adminInitiateAuth(authReq))
+        _                <- Sync[F].delay(println(s"----->> getChallengeName => ${authResp.getChallengeName}"))
+        authChallengeReq <- authChallengeRequestBuilder(username, password, authResp)
+        authResult <- Sync[F]
+          .pure(authResp.getChallengeName == NEW_PASSWORD_REQUIRED_CHALLENGE_NAME)
+          .ifM(
+            Sync[F].delay(client.adminRespondToAuthChallenge(authChallengeReq).getAuthenticationResult),
+            Sync[F].pure(authResp.getAuthenticationResult))
+
+        _ <- Sync[F].delay(
+          println(s"----->> AuthenticationResultType::getAccessToken       => ${authResult.getAccessToken}"))
+        _ <- Sync[F].delay(
+          println(s"----->> AuthenticationResultType::getRefreshToken      => ${authResult.getRefreshToken}"))
+        _ <- Sync[F].delay(
+          println(s"----->> AuthenticationResultType::getTokenType         => ${authResult.getTokenType}"))
+        _ <- Sync[F].delay(
+          println(s"----->> AuthenticationResultType::getIdToken           => ${authResult.getIdToken}"))
+
+        _ <- Sync[F].delay(
+          println(s"----->> AuthenticationResultType::getNewDeviceMetadata => ${authResult.getNewDeviceMetadata}"))
+
+      } yield
+        Session(
+          authResult.getAccessToken,
+          authResult.getRefreshToken,
+          username,
+          authResult.getTokenType,
+          authResult.getExpiresIn.toLong)
     }
 
     private def clientBuilder(config: AwsConfig): F[AWSCognitoIdentityProvider] = {
@@ -53,24 +112,23 @@ trait UserCognitoGatewayInstances {
           .build())
     }
 
-    private def userRequestBuilder(config: AwsConfig, user: User): AdminCreateUserRequest = {
-
-      new AdminCreateUserRequest()
-        .withUserPoolId(config.cognito.userPoolId)
-        .withUsername(user.username)
-        .withUserAttributes(
-          new AttributeType()
-            .withName(EMAIL_FIELD)
-            .withValue(user.email),
-          new AttributeType().withName(NAME_FIELD).withValue(user.firstName),
-          new AttributeType().withName(FAMILY_NAME_FIELD).withValue(user.lastName),
-          new AttributeType().withName(PHONE_NUMBER_FIELD).withValue(user.cellPhone.getOrElse(EMPTY)),
-          new AttributeType().withName(EMAIL_VERIFIED_FIELD).withValue(DEFAULT_EMAIL_VERIFIED_VALUE)
-        )
-        .withTemporaryPassword(user.password)
-        .withMessageAction(MESSAGE_ACTION_VALUE)
-        .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
-        .withForceAliasCreation(false)
-    }
+    private def userRequestBuilder(config: AwsConfig, user: User): F[AdminCreateUserRequest] =
+      Sync[F].delay(
+        new AdminCreateUserRequest()
+          .withUserPoolId(config.cognito.userPoolId)
+          .withUsername(user.username)
+          .withUserAttributes(
+            new AttributeType()
+              .withName(EMAIL_FIELD)
+              .withValue(user.email),
+            new AttributeType().withName(NAME_FIELD).withValue(user.firstName),
+            new AttributeType().withName(FAMILY_NAME_FIELD).withValue(user.lastName),
+            new AttributeType().withName(PHONE_NUMBER_FIELD).withValue(user.cellPhone.getOrElse(EMPTY)),
+            new AttributeType().withName(EMAIL_VERIFIED_FIELD).withValue(DEFAULT_EMAIL_VERIFIED_VALUE)
+          )
+          .withTemporaryPassword(user.password)
+          .withMessageAction(MESSAGE_ACTION_VALUE)
+          .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
+          .withForceAliasCreation(false))
   }
 }

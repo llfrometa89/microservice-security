@@ -2,7 +2,7 @@ package io.github.llfrometa89.infrastructure.controllers
 
 import cats.effect.Sync
 import cats.implicits._
-import io.github.llfrometa89.application.dto.RegisterDto
+import io.github.llfrometa89.application.dto.{LoginDto, RegisterDto}
 import io.github.llfrometa89.application.services.UserService
 import io.github.llfrometa89.domain.models.User.UserError
 import io.github.llfrometa89.infrastructure.controllers.error_handlers.HttpErrorHandler
@@ -13,6 +13,12 @@ case class UserController[F[_]: Sync]()(implicit userService: UserService[F]) ex
 
   private val httpRoutes: HttpRoutes[F] = HttpRoutes.of[F] {
 
+    case req @ POST -> Root / USERS / LOGIN =>
+      for {
+        loginData <- req.as[LoginDto]
+        session   <- UserService[F].login(loginData)
+        resp      <- Ok(session)
+      } yield resp
     case req @ POST -> Root / USERS / REGISTER =>
       for {
         registerData <- req.as[RegisterDto]

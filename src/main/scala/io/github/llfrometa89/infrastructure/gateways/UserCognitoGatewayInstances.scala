@@ -8,33 +8,32 @@ import com.amazonaws.services.cognitoidp.{AWSCognitoIdentityProvider, AWSCognito
 import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.models.User.{UserAlreadyExists, UserNotAuthorized}
 import io.github.llfrometa89.domain.models.{Session, User}
-import io.github.llfrometa89.infrastructure.configurations.{AwsConfig, ConfigFactory}
+import io.github.llfrometa89.infrastructure.configurations.ConfigFactory._
 import com.amazonaws.services.cognitoidp.model.NotAuthorizedException
-
 import scala.collection.JavaConverters._
 
 trait UserCognitoGatewayInstances {
 
-  implicit def instanceUserGateway[F[_]: Sync: ConfigFactory] = new UserGateway[F] {
+  final val EMAIL_FIELD                          = "email"
+  final val NAME_FIELD                           = "name"
+  final val FAMILY_NAME_FIELD                    = "family_name"
+  final val PHONE_NUMBER_FIELD                   = "phone_number"
+  final val EMAIL_VERIFIED_FIELD                 = "email_verified"
+  final val EMPTY                                = "email_verified"
+  final val DEFAULT_EMAIL_VERIFIED_VALUE         = "true"
+  final val MESSAGE_ACTION_VALUE                 = "SUPPRESS"
+  final val USERNAME_FIELD                       = "USERNAME"
+  final val PASSWORD_FIELD                       = "PASSWORD"
+  final val NEW_PASSWORD_FIELD                   = "NEW_PASSWORD"
+  final val NEW_PASSWORD_REQUIRED_CHALLENGE_NAME = "NEW_PASSWORD_REQUIRED"
 
-    final val EMAIL_FIELD                          = "email"
-    final val NAME_FIELD                           = "name"
-    final val FAMILY_NAME_FIELD                    = "family_name"
-    final val PHONE_NUMBER_FIELD                   = "phone_number"
-    final val EMAIL_VERIFIED_FIELD                 = "email_verified"
-    final val EMPTY                                = "email_verified"
-    final val DEFAULT_EMAIL_VERIFIED_VALUE         = "true"
-    final val MESSAGE_ACTION_VALUE                 = "SUPPRESS"
-    final val USERNAME_FIELD                       = "USERNAME"
-    final val PASSWORD_FIELD                       = "PASSWORD"
-    final val NEW_PASSWORD_FIELD                   = "NEW_PASSWORD"
-    final val NEW_PASSWORD_REQUIRED_CHALLENGE_NAME = "NEW_PASSWORD_REQUIRED"
+  implicit def instanceUserGateway[F[_]: Sync: HasAwsConfig] = new UserGateway[F] {
 
     def register(user: User): F[User] = {
       (for {
-        config  <- ConfigFactory[F].build
-        client  <- clientBuilder(config.aws)
-        userReq <- userRequestBuilder(config.aws, user)
+        config  <- ask[F, AwsConfig]
+        client  <- clientBuilder(config)
+        userReq <- userRequestBuilder(config, user)
         _       <- Sync[F].delay(client.adminCreateUser(userReq))
       } yield user).recoverWith {
         case _: UsernameExistsException => Sync[F].raiseError(UserAlreadyExists(user.email))
@@ -44,11 +43,11 @@ trait UserCognitoGatewayInstances {
 
     def login(username: String, password: String): F[Session] = {
       val computation = for {
-        config           <- ConfigFactory[F].build
-        client           <- clientBuilder(config.aws)
-        authReq          <- authRequestBuilder(username, password, config.aws)
+        config           <- ask[F, AwsConfig]
+        client           <- clientBuilder(config)
+        authReq          <- authRequestBuilder(username, password, config)
         authResp         <- Sync[F].delay(client.adminInitiateAuth(authReq))
-        authChallengeReq <- authChallengeRequestBuilder(username, password, authResp, config.aws)
+        authChallengeReq <- authChallengeRequestBuilder(username, password, authResp, config)
         authResult <- Sync[F]
           .pure(authResp.getChallengeName == NEW_PASSWORD_REQUIRED_CHALLENGE_NAME)
           .ifM(

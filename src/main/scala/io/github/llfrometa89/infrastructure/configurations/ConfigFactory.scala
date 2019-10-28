@@ -1,39 +1,35 @@
 package io.github.llfrometa89.infrastructure.configurations
 
+import cats.Applicative
 import cats.effect.Sync
-import io.github.llfrometa89.infrastructure.configurations.ConfigFactory.CanNotLoadResource
-import pureconfig._
-import pureconfig.error.ConfigReaderFailures
+import cats.mtl.{ApplicativeAsk, DefaultApplicativeAsk}
+import pureconfig.ConfigSource
 import pureconfig.generic.auto._
-
-trait ConfigFactory[F[_]] {
-  def build: F[Configuration]
-}
 
 object ConfigFactory {
 
-  def apply[F[_]](implicit F: ConfigFactory[F]): ConfigFactory[F] = F
+  case class AppConfig(http: HttpConfig, aws: AwsConfig)
+  case class HttpConfig(server: HttpServerConfig)
+  case class HttpServerConfig(host: String, port: Int)
+  case class AwsConfig(accessKey: String, secretKey: String, region: String, cognito: AwsCognitoConfig)
+  case class AwsCognitoConfig(userPoolId: String, appClientId: String)
 
-  case object ConfigError                                    extends Exception
-  case class CanNotLoadResource(error: ConfigReaderFailures) extends Exception
+  def ask[F[_], A](implicit ev: ApplicativeAsk[F, A]): F[A] = ev.ask
+
+  def loadConfig[F[_]: Sync]: F[AppConfig] =
+    Sync[F].delay(ConfigSource.default.loadOrThrow[AppConfig])
+
+  type HasAppConfig[F[_]] = ApplicativeAsk[F, AppConfig]
+  type HasAwsConfig[F[_]] = ApplicativeAsk[F, AwsConfig]
 }
 
-trait PureConfigFactoryInstances {
+trait ConfigFactoryInstances {
 
-  implicit def instanceConfigFactory[F[_]: Sync]: ConfigFactory[F] = new ConfigFactory[F] {
+  import ConfigFactory._
 
-    def build: F[Configuration] =
-      ConfigSource.default.load[Configuration] match {
-        case Right(value) => Sync[F].pure(value)
-        case Left(error)  => Sync[F].raiseError(CanNotLoadResource(error))
-      }
-  }
+  implicit def configReader[F[_]: Sync]: HasAppConfig[F] =
+    new DefaultApplicativeAsk[F, AppConfig] {
+      override val applicative: Applicative[F] = implicitly
+      override def ask: F[AppConfig]           = loadConfig[F]
+    }
 }
-
-case class Configuration(http: HttpConfig, aws: AwsConfig)
-
-case class HttpConfig(server: HttpServerConfig)
-case class HttpServerConfig(host: String, port: Int)
-
-case class AwsConfig(accessKey: String, secretKey: String, region: String, cognito: AwsCognitoConfig)
-case class AwsCognitoConfig(userPoolId: String, appClientId: String)

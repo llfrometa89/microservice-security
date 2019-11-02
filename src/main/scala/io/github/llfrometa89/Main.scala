@@ -23,6 +23,7 @@ object WebServer {
   def run[F[_]: ConcurrentEffect](implicit T: Timer[F]): Stream[F, Nothing] = {
 
     val routes = for {
+
       r1 <- UserController[F]().routes(UserHttpErrorHandler[F])
     } yield r1
 

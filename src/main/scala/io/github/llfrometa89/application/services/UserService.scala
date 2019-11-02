@@ -27,7 +27,7 @@ trait UserServiceInstances {
   implicit def instanceUserService[F[_]: Sync: UserProfileRepository: UserGateway] = new UserService[F] {
 
     override def login(loginData: LoginDto): F[SessionDto] =
-      UserGateway[F].login(loginData.email, loginData.password).map(SessionDto.fromSession)
+      UserGateway[F].login(loginData.username, loginData.password).map(SessionDto.fromSession)
 
     def register(registerDto: RegisterDto): F[String] =
       for {
@@ -39,7 +39,7 @@ trait UserServiceInstances {
     private def validateUser(registerDto: RegisterDto): F[User] = {
       UserValidator
         .validateUser(
-          registerDto.email,
+          registerDto.username,
           registerDto.password,
           registerDto.firstName,
           registerDto.lastName,

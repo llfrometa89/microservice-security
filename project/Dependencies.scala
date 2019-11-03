@@ -17,7 +17,6 @@ object Dependencies {
     val kindProjector     = "0.9.8"
     val betterMonadicFor  = "0.3.0-M4"
     val catsMeowMtl       = "0.2.0"
-    val specs2Version     = "4.1.0"
   }
 
   object Libraries {
@@ -44,7 +43,6 @@ object Dependencies {
     lazy val scalaCheck           = "org.scalacheck" %% "scalacheck" % Versions.scalaCheckVersion
     lazy val kindProjector        = "org.spire-math" %% "kind-projector" % Versions.kindProjector
     lazy val betterMonadicFor     = "com.olegpy" %% "better-monadic-for" % Versions.betterMonadicFor
-    lazy val specs2Core           = "org.specs2" %% "specs2-core" % Versions.specs2Version
   }
 
 }

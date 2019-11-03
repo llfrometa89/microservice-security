@@ -59,8 +59,7 @@ libraryDependencies ++= Seq(
   Libraries.awsJavaSdkCognitoidp,
   Libraries.pureConfig,
   Libraries.scalaTest  % Test,
-  Libraries.scalaCheck % Test,
-  Libraries.specs2Core % Test
+  Libraries.scalaCheck % Test
 )
 
 scalacOptions ++= commonScalacOptions

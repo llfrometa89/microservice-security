@@ -58,8 +58,9 @@ libraryDependencies ++= Seq(
   Libraries.awsJavaSdkCore,
   Libraries.awsJavaSdkCognitoidp,
   Libraries.pureConfig,
-  Libraries.scalaTest  % Test,
-  Libraries.scalaCheck % Test
+  Libraries.scalaTest        % Test,
+  Libraries.scalaCheck       % Test,
+  "org.springframework.data" % "spring-data-jpa" % "2.2.0.RELEASE"
 )
 
 scalacOptions ++= commonScalacOptions

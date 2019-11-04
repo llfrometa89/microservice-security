@@ -13,8 +13,8 @@ import io.github.llfrometa89.fixtures.SessionFixture
 class UserControllerSpec extends BaseUnitTest with SessionFixture {
 
   implicit val userService: UserService[IO] = new UserService[IO] {
-    override def login(loginData: LoginDto): IO[SessionDto]     = IO(session)
-    override def register(registerDto: RegisterDto): IO[String] = ???
+    def login(loginData: LoginDto): IO[SessionDto]     = IO(session)
+    def register(registerDto: RegisterDto): IO[String] = ???
   }
 
   val userControllerRoutes: HttpRoutes[IO] = UserController[IO]().routes(UserHttpErrorHandler[IO])

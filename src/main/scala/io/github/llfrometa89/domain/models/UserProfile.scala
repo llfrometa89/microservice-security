@@ -1,6 +1,6 @@
 package io.github.llfrometa89.domain.models
 
-import io.github.llfrometa89.infrastructure.cross.IdGenerator
+import io.github.llfrometa89.infrastructure.cross.UUIDGenerator
 
 case class UserProfile(
     profileId: String,
@@ -15,7 +15,7 @@ object UserProfile {
 
   def fromUser(user: User): UserProfile =
     UserProfile(
-      IdGenerator.generate,
+      UUIDGenerator.generate,
       user.userId.getOrElse(""),
       user.email,
       user.username,

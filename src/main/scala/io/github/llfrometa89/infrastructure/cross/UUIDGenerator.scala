@@ -2,6 +2,6 @@ package io.github.llfrometa89.infrastructure.cross
 
 import java.util.UUID
 
-object IdGenerator {
+object UUIDGenerator {
   def generate: String = UUID.randomUUID().toString
 }

@@ -4,11 +4,11 @@ import io.github.llfrometa89.domain.models.User
 import cats.implicits._
 import cats.data._
 import cats.data.Validated._
-import io.github.llfrometa89.domain.models.User.DomainValidation
+import io.github.llfrometa89.infrastructure.cross.validator.Validator.ValidationMessage
 
 object UserValidator {
 
-  type ValidationResult[A] = ValidatedNec[DomainValidation, A]
+  type ValidationResult[A] = ValidatedNec[ValidationMessage, A]
 
   def validateUser(
       email: String,
@@ -34,24 +34,24 @@ object UserValidator {
 
 }
 
-case object UsernameHasSpecialCharacters extends DomainValidation {
-  def errorMessage: String = "Username cannot contain special characters."
-  def errorCode: String    = productPrefix
+case object UsernameHasSpecialCharacters extends ValidationMessage {
+  def message: String = "Username cannot contain special characters."
+  def code: String    = productPrefix
 
 }
 
-case object PasswordDoesNotMeetCriteria extends DomainValidation {
-  def errorMessage: String =
+case object PasswordDoesNotMeetCriteria extends ValidationMessage {
+  def message: String =
     "Password must be at least 10 characters long, including an uppercase and a lowercase letter, one number and one special character."
-  def errorCode: String = productPrefix
+  def code: String = productPrefix
 }
 
-case object FirstNameHasSpecialCharacters extends DomainValidation {
-  def errorMessage: String = "First name cannot contain spaces, numbers or special characters."
-  def errorCode: String    = productPrefix
+case object FirstNameHasSpecialCharacters extends ValidationMessage {
+  def message: String = "First name cannot contain spaces, numbers or special characters."
+  def code: String    = productPrefix
 }
 
-case object LastNameHasSpecialCharacters extends DomainValidation {
-  def errorMessage: String = "Last name cannot contain spaces, numbers or special characters."
-  def errorCode: String    = productPrefix
+case object LastNameHasSpecialCharacters extends ValidationMessage {
+  def message: String = "Last name cannot contain spaces, numbers or special characters."
+  def code: String    = productPrefix
 }

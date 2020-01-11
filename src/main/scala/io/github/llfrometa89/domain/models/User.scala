@@ -14,7 +14,13 @@ case class User(
 object User {
 
   def apply(email: String, password: String, firstName: String, lastName: String, cellPhone: Option[String]): User =
-    new User(email, email.split("\\@").head, password, firstName, lastName, cellPhone)
+    new User(
+      email,
+      email.split("\\@").head, //TODO Remove
+      password,
+      firstName,
+      lastName,
+      cellPhone)
 
   sealed abstract class UserError                               extends Exception
   case class UserAlreadyExists(email: String)                   extends UserError

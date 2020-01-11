@@ -8,9 +8,11 @@ import io.github.llfrometa89.application.dto.Session
 import io.github.llfrometa89.application.dto.Session.SessionResponse
 import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.models.User.UserValidationError
-import io.github.llfrometa89.domain.models.{User, UserProfile}
-import io.github.llfrometa89.domain.repositories.UserProfileRepository
+import io.github.llfrometa89.domain.models.{Profile, User}
+import io.github.llfrometa89.domain.repositories.ProfileRepository
 import io.github.llfrometa89.domain.validators.UserValidator
+import io.github.llfrometa89.infrastructure.cross.validator.Validator.ValidationMessage
+import io.github.llfrometa89.infrastructure.implicits.validated._
 
 trait UserService[F[_]] {
 
@@ -27,7 +29,7 @@ object UserService {
 
 trait UserServiceInstances {
 
-  implicit def instanceUserService[F[_]: Sync: UserProfileRepository: UserGateway] = new UserService[F] {
+  implicit def instanceUserService[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
 
     override def login(loginData: LoginRequest): F[SessionResponse] =
       UserGateway[F].login(loginData.username, loginData.password).map(Session.fromSession)
@@ -36,22 +38,16 @@ trait UserServiceInstances {
       for {
         userParam   <- validateUser(registerDto: RegisterRequest)
         user        <- UserGateway[F].register(userParam)
-        userProfile <- UserProfileRepository[F].register(UserProfile.fromUser(user))
-      } yield RegisterResponse(userProfile.profileId)
+        userProfile <- ProfileRepository[F].register(Profile.fromUser(user))
+      } yield RegisterResponse(userProfile.id)
 
-    private def validateUser(registerDto: RegisterRequest): F[User] = {
+    private def validateUser(data: RegisterRequest): F[User] = {
       UserValidator
-        .validateUser(
-          registerDto.username,
-          registerDto.password,
-          registerDto.firstName,
-          registerDto.lastName,
-          registerDto.cellPhone)
-        .toEither match {
-        case Right(value) => Sync[F].pure(value)
-        case Left(errors) => Sync[F].raiseError(UserValidationError(errors.toList))
-      }
+        .validateUser(data.username, data.password, data.firstName, data.lastName, data.cellPhone)
+        .liftF(validationErrorFn)
     }
+
+    private def validationErrorFn(errors: List[ValidationMessage]): Exception = UserValidationError(errors)
   }
 }
 

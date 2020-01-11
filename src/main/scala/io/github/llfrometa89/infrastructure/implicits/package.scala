@@ -9,4 +9,7 @@ package object implicits
     extends ConfigFactoryInstances
     with UserCognitoGatewayInstances
     with UserProfileMysqlRepositoryInstances
-    with UserServiceInstances
+    with UserServiceInstances {
+
+  object validated extends syntax.ValidatedSyntax
+}

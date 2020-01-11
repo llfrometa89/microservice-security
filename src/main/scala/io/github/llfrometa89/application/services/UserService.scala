@@ -1,8 +1,11 @@
 package io.github.llfrometa89.application.services
 
-import cats.implicits._
 import cats.effect.Sync
-import io.github.llfrometa89.application.dto.{LoginDto, RegisterDto, SessionDto}
+import cats.implicits._
+import io.github.llfrometa89.application.dto.Login.LoginRequest
+import io.github.llfrometa89.application.dto.Register.{RegisterRequest, RegisterResponse}
+import io.github.llfrometa89.application.dto.Session
+import io.github.llfrometa89.application.dto.Session.SessionResponse
 import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.models.User.UserValidationError
 import io.github.llfrometa89.domain.models.{User, UserProfile}
@@ -11,9 +14,9 @@ import io.github.llfrometa89.domain.validators.UserValidator
 
 trait UserService[F[_]] {
 
-  def login(loginData: LoginDto): F[SessionDto]
+  def login(loginData: LoginRequest): F[SessionResponse]
 
-  def register(registerDto: RegisterDto): F[String]
+  def register(registerDto: RegisterRequest): F[RegisterResponse]
 }
 
 object UserService {
@@ -26,17 +29,17 @@ trait UserServiceInstances {
 
   implicit def instanceUserService[F[_]: Sync: UserProfileRepository: UserGateway] = new UserService[F] {
 
-    override def login(loginData: LoginDto): F[SessionDto] =
-      UserGateway[F].login(loginData.username, loginData.password).map(SessionDto.fromSession)
+    override def login(loginData: LoginRequest): F[SessionResponse] =
+      UserGateway[F].login(loginData.username, loginData.password).map(Session.fromSession)
 
-    def register(registerDto: RegisterDto): F[String] =
+    def register(registerDto: RegisterRequest): F[RegisterResponse] =
       for {
-        userParam   <- validateUser(registerDto: RegisterDto)
+        userParam   <- validateUser(registerDto: RegisterRequest)
         user        <- UserGateway[F].register(userParam)
         userProfile <- UserProfileRepository[F].register(UserProfile.fromUser(user))
-      } yield userProfile.profileId
+      } yield RegisterResponse(userProfile.profileId)
 
-    private def validateUser(registerDto: RegisterDto): F[User] = {
+    private def validateUser(registerDto: RegisterRequest): F[User] = {
       UserValidator
         .validateUser(
           registerDto.username,

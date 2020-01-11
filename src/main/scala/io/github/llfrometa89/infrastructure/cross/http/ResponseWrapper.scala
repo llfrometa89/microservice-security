@@ -22,7 +22,7 @@ object ResponseWrapper {
       warnings: List[MessageResponse],
       linked: List[MessageResponse])
 
-  case class SuccessResponse(messages: MessagesResponse)
+  case class ResultResponse(messages: MessagesResponse)
 
   object MessagesResponse {
 
@@ -36,9 +36,13 @@ object ResponseWrapper {
     implicit def messagesResponseEntityEncoder[F[_]: Sync]: EntityEncoder[F, MessagesResponse] = jsonEncoderOf
   }
 
-  object SuccessResponse {
-    implicit val successResponseEncoder: Encoder[SuccessResponse]                                   = deriveEncoder[SuccessResponse]
-    implicit def SuccessResponseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, SuccessResponse] = jsonEncoderOf
+  object ResultResponse {
+
+    def apply(error: MessageResponse): ResultResponse        = new ResultResponse(MessagesResponse(error))
+    def apply(errors: List[MessageResponse]): ResultResponse = new ResultResponse(MessagesResponse(errors))
+
+    implicit val resultResponseEncoder: Encoder[ResultResponse]                                   = deriveEncoder[ResultResponse]
+    implicit def resultResponseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, ResultResponse] = jsonEncoderOf
   }
 
 }

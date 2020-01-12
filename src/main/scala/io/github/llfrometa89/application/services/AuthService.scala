@@ -21,7 +21,7 @@ object AuthService {
 
 trait AuthServiceInstances {
 
-  implicit def instance444[F[_]: Sync: ProfileRepository: UserGateway] = new AuthService[F] {
+  implicit def instanceAuthService[F[_]: Sync: ProfileRepository: UserGateway] = new AuthService[F] {
 
     def login(loginData: LoginRequest): F[SessionResponse] =
       UserGateway[F]

@@ -23,7 +23,7 @@ object UserService {
 
 trait UserServiceInstances {
 
-  implicit def instance22[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
+  implicit def instanceUserService[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
 
     def register(registerDto: RegisterRequest): F[RegisterResponse] =
       for {

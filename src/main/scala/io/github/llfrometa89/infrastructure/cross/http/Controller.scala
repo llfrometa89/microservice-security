@@ -1,4 +1,4 @@
-package io.github.llfrometa89.infrastructure.controllers
+package io.github.llfrometa89.infrastructure.cross.http
 
 import cats.effect.Sync
 import org.http4s.HttpRoutes

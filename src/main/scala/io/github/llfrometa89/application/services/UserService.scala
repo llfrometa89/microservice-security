@@ -2,10 +2,7 @@ package io.github.llfrometa89.application.services
 
 import cats.effect.Sync
 import cats.implicits._
-import io.github.llfrometa89.application.dto.Login.LoginRequest
 import io.github.llfrometa89.application.dto.Register.{RegisterRequest, RegisterResponse}
-import io.github.llfrometa89.application.dto.Session
-import io.github.llfrometa89.application.dto.Session.SessionResponse
 import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.models.User.UserValidationError
 import io.github.llfrometa89.domain.models.{Profile, User}
@@ -16,30 +13,24 @@ import io.github.llfrometa89.infrastructure.implicits.validated._
 
 trait UserService[F[_]] {
 
-  def login(loginData: LoginRequest): F[SessionResponse]
-
   def register(registerDto: RegisterRequest): F[RegisterResponse]
 }
 
 object UserService {
 
   def apply[F[_]](implicit ev: UserService[F]): UserService[F] = ev
-
 }
 
 trait UserServiceInstances {
 
-  implicit def instanceUserService[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
-
-    override def login(loginData: LoginRequest): F[SessionResponse] =
-      UserGateway[F].login(loginData.username, loginData.password).map(Session.fromSession)
+  implicit def instance22[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
 
     def register(registerDto: RegisterRequest): F[RegisterResponse] =
       for {
-        userParam   <- validateUser(registerDto: RegisterRequest)
-        user        <- UserGateway[F].register(userParam)
-        userProfile <- ProfileRepository[F].register(Profile.fromUser(user))
-      } yield RegisterResponse(userProfile.id)
+        validUser <- validateUser(registerDto: RegisterRequest)
+        user      <- UserGateway[F].register(validUser)
+        profile   <- ProfileRepository[F].register(Profile.fromUser(user))
+      } yield RegisterResponse(profile.id)
 
     private def validateUser(data: RegisterRequest): F[User] = {
       UserValidator

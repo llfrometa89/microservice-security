@@ -8,13 +8,13 @@ import org.http4s.circe.{jsonEncoderOf, jsonOf}
 
 object Login {
 
-  case class LoginRequest(username: String, password: String)
+  case class LoginRequest(email: String, password: String)
 
   object LoginRequest {
 
     implicit val loginEncoder: Encoder[LoginRequest]                            = deriveEncoder[LoginRequest]
-    implicit val loginDecoder: Decoder[LoginRequest]                            = deriveDecoder[LoginRequest]
     implicit def loginEntityEncoder[F[_]: Sync]: EntityEncoder[F, LoginRequest] = jsonEncoderOf
+    implicit val loginDecoder: Decoder[LoginRequest]                            = deriveDecoder[LoginRequest]
     implicit def loginEntityDecoder[F[_]: Sync]: EntityDecoder[F, LoginRequest] = jsonOf
   }
 }

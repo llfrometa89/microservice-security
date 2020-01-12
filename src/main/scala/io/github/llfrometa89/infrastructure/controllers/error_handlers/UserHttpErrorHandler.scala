@@ -2,6 +2,7 @@ package io.github.llfrometa89.infrastructure.controllers.error_handlers
 
 import cats.MonadError
 import io.github.llfrometa89.domain.models.User._
+import io.github.llfrometa89.infrastructure.cross.http.{HttpErrorHandler, RoutesHttpErrorHandler}
 import org.http4s.Response
 import io.github.llfrometa89.infrastructure.cross.http.ResponseWrapper._
 

@@ -1,9 +1,9 @@
-package io.github.llfrometa89.infrastructure.controllers.error_handlers
+package io.github.llfrometa89.infrastructure.cross.http
 
 import cats.ApplicativeError
 import cats.data.{Kleisli, OptionT}
-import org.http4s.{HttpRoutes, Response}
 import org.http4s.dsl.Http4sDsl
+import org.http4s.{HttpRoutes, Response}
 
 trait HttpErrorHandler[F[_], E <: Throwable] {
   def handle(routes: HttpRoutes[F]): HttpRoutes[F]

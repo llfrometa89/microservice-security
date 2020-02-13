@@ -16,7 +16,7 @@ object Dependencies {
     val pureConfigVersion = "0.12.1"
     val kindProjector     = "0.9.8"
     val betterMonadicFor  = "0.3.0-M4"
-    val catsMeowMtl       = "0.2.0"
+    val catsMeowMtl       = "0.2.1"
   }
 
   object Libraries {

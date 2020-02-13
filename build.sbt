@@ -60,7 +60,7 @@ libraryDependencies ++= Seq(
   Libraries.pureConfig,
   Libraries.scalaTest        % Test,
   Libraries.scalaCheck       % Test,
-  "org.springframework.data" % "spring-data-jpa" % "2.2.0.RELEASE"
+  "org.springframework.data" % "spring-data-jpa" % "2.2.4.RELEASE"
 )
 
 scalacOptions ++= commonScalacOptions

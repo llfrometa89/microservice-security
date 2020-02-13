@@ -10,7 +10,7 @@ object Dependencies {
     val monocleVersion    = "2.0.0"
     val scalaCheckVersion = "1.14.2"
     val http4sVersion     = "0.21.0-M5"
-    val circeVersion      = "0.12.2"
+    val circeVersion      = "0.12.3"
     val logbackVersion    = "1.2.3"
     val awsSdkVersion     = "1.11.656"
     val pureConfigVersion = "0.12.1"

@@ -14,7 +14,7 @@ object Dependencies {
     val logbackVersion    = "1.2.3"
     val awsSdkVersion     = "1.11.656"
     val pureConfigVersion = "0.12.1"
-    val kindProjector     = "0.9.8"
+    val kindProjector     = "0.9.10"
     val betterMonadicFor  = "0.3.0-M4"
     val catsMeowMtl       = "0.2.0"
   }

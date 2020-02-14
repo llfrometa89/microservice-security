@@ -22,7 +22,7 @@ class UserControllerSpec extends BaseUnitTest with SessionFixture {
   describe("login") {
     it("login success") {
       val loginRequest =
-        Request[IO](Method.POST, uri"/users/login").withEntity(LoginRequest(username, password))
+        Request[IO](Method.POST, uri"/auth/login").withEntity(LoginRequest(username, password))
 
       val loginResponse: Response[IO] = authControllerRoutes.orNotFound(loginRequest).unsafeRunSync()
 

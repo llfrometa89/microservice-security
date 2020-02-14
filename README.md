@@ -5,15 +5,14 @@
 
 
 # Steps to run
-
   - Create `.env` with the below structure
-  ```shell script
-  export AWS_SECRET_KEY=<AWS_SECRET_KEY>  
-  export AWS_ACCESS_KEY=<AWS_ACCESS_KEY>  
-  export AWS_REGION=<AWS_REGION>
-  export AWS_COGNITO_USER_POOL_ID=<AWS_COGNITO_USER_POOL_ID>
-  ```
+```shell script
+export AWS_SECRET_KEY=<AWS_SECRET_KEY>  
+export AWS_ACCESS_KEY=<AWS_ACCESS_KEY>  
+export AWS_REGION=<AWS_REGION>
+export AWS_COGNITO_USER_POOL_ID=<AWS_COGNITO_USER_POOL_ID>
+```
   - Run at terminal
-  ```  
-  $ source .env && sbt run  
-  ```
+```  
+$ source .env && sbt run  
+```

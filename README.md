@@ -1,4 +1,4 @@
-### Steps to run:  
+### Steps to run 
 
 1. Create `.env` with the below structure:  
   

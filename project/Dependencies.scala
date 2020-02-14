@@ -12,7 +12,7 @@ object Dependencies {
     val http4sVersion     = "0.21.0-M5"
     val circeVersion      = "0.12.2"
     val logbackVersion    = "1.2.3"
-    val awsSdkVersion     = "1.11.656"
+    val awsSdkVersion     = "1.11.722"
     val pureConfigVersion = "0.12.1"
     val kindProjector     = "0.11.0"
     val betterMonadicFor  = "0.3.1"

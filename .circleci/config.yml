@@ -43,7 +43,7 @@ jobs:
             - ./target/universal/stage
 workflows:
   version: 2
-  locations:
+  m-security:
     jobs:
       - build:
           filters:

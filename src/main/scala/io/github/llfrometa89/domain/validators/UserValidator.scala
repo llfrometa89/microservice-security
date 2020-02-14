@@ -15,10 +15,13 @@ object UserValidator {
       password: String,
       firstName: String,
       lastName: String,
-      cellPhone: Option[String]): ValidationResult[User] =
+      cellPhone: Option[String]
+  ): ValidationResult[User] =
     (validateEmail(email), validatePassword(password), validateFirstName(firstName), validateLastName(lastName))
-      .mapN((validatedEmail, validatedPassword, validatedFirstName, validatedLastName) =>
-        User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName, cellPhone))
+      .mapN(
+        (validatedEmail, validatedPassword, validatedFirstName, validatedLastName) =>
+          User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName, cellPhone)
+      )
 
   private def validateEmail(userName: String): ValidationResult[String] =
     if (userName.nonEmpty) userName.validNec else UsernameHasSpecialCharacters.invalidNec

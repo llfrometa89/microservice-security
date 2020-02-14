@@ -9,7 +9,8 @@ case class User(
     firstName: String,
     lastName: String,
     cellPhone: Option[String],
-    userId: Option[String] = None)
+    userId: Option[String] = None
+)
 
 object User {
 
@@ -20,7 +21,8 @@ object User {
       password,
       firstName,
       lastName,
-      cellPhone)
+      cellPhone
+    )
 
   sealed abstract class UserError                               extends Exception
   case class UserAlreadyExists(email: String)                   extends UserError

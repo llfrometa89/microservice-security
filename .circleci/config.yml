@@ -16,6 +16,9 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "build.sbt" }}-{{ checksum "./project/build.properties" }}-{{ checksum "./project/plugins.sbt" }}-{{ checksum "./project/Dependencies.scala" }}
       - run:
+          name: Check that everything is formatted properly
+          command: ./sbt scalafmtSbtCheck scalafmtCheckAll
+      - run:
           name: Run clean coverage test
           command: ./sbt clean coverage test
       - run:

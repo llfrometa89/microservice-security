@@ -40,14 +40,15 @@ trait UserCognitoGatewayInstances {
           .pure(authResp.getChallengeName == NewPasswordRequiredChallengeName)
           .ifM(
             Sync[F].delay(client.adminRespondToAuthChallenge(authChallengeReq).getAuthenticationResult),
-            Sync[F].pure(authResp.getAuthenticationResult))
-      } yield
-        Session(
-          authResult.getAccessToken,
-          authResult.getRefreshToken,
-          username,
-          authResult.getTokenType,
-          authResult.getExpiresIn.toLong)
+            Sync[F].pure(authResp.getAuthenticationResult)
+          )
+      } yield Session(
+        authResult.getAccessToken,
+        authResult.getRefreshToken,
+        username,
+        authResult.getTokenType,
+        authResult.getExpiresIn.toLong
+      )
 
       computation.recoverWith {
         case _: NotAuthorizedException => Sync[F].raiseError(UserNotAuthorized(username))
@@ -61,21 +62,25 @@ trait UserCognitoGatewayInstances {
           .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
           .withClientId(config.cognito.appClientId)
           .withUserPoolId(config.cognito.userPoolId)
-          .withAuthParameters(Map(UsernameField -> username, PasswordField -> password).asJava))
+          .withAuthParameters(Map(UsernameField -> username, PasswordField -> password).asJava)
+      )
 
     private def authChallengeRequestBuilder(
         username: String,
         password: String,
         authResp: AdminInitiateAuthResult,
-        config: AwsConfig): F[AdminRespondToAuthChallengeRequest] = {
+        config: AwsConfig
+    ): F[AdminRespondToAuthChallengeRequest] = {
       Sync[F].delay(
         new AdminRespondToAuthChallengeRequest()
           .withChallengeName(ChallengeNameType.NEW_PASSWORD_REQUIRED)
           .withChallengeResponses(
-            Map(UsernameField -> username, PasswordField -> password, NewPasswordField -> password).asJava)
+            Map(UsernameField -> username, PasswordField -> password, NewPasswordField -> password).asJava
+          )
           .withClientId(config.cognito.appClientId)
           .withUserPoolId(config.cognito.userPoolId)
-          .withSession(authResp.getSession))
+          .withSession(authResp.getSession)
+      )
     }
 
     private def clientBuilder(config: AwsConfig): F[AWSCognitoIdentityProvider] = {
@@ -88,7 +93,8 @@ trait UserCognitoGatewayInstances {
           .standard()
           .withCredentials(credentialsProvider)
           .withRegion(config.region)
-          .build())
+          .build()
+      )
     }
 
     private def userRequestBuilder(config: AwsConfig, user: User): F[AdminCreateUserRequest] =
@@ -108,7 +114,8 @@ trait UserCognitoGatewayInstances {
           .withTemporaryPassword(user.password)
           .withMessageAction(MessageActionValue)
           .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
-          .withForceAliasCreation(false))
+          .withForceAliasCreation(false)
+      )
   }
 }
 

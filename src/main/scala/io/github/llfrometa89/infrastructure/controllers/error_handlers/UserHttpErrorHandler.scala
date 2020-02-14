@@ -19,12 +19,15 @@ object UserHttpErrorHandler {
         case error @ UserNotFound(username) =>
           NotFound(
             ResultResponse(
-              MessagesResponse(MessageResponse(error.productPrefix, s"Not found user with [username=$username]"))))
+              MessagesResponse(MessageResponse(error.productPrefix, s"Not found user with [username=$username]"))
+            )
+          )
         case UserValidationError(list) =>
           BadRequest(ResultResponse(list.map(dv => MessageResponse(dv.code, dv.message))))
         case error @ UserNotAuthorized(username) =>
           BadRequest( //TODO Unauthorized
-            ResultResponse(MessageResponse(error.productPrefix, s"Incorrect username[$username] or password ")))
+            ResultResponse(MessageResponse(error.productPrefix, s"Incorrect username[$username] or password "))
+          )
       }
     }
 }

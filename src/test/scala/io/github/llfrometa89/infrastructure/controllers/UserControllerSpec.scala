@@ -12,7 +12,6 @@ import org.http4s.implicits._
 import org.http4s.{Response, Status, _}
 
 class UserControllerSpec extends BaseUnitTest with SessionFixture {
-
   implicit val authService = new AuthService[IO] {
     def login(loginData: LoginRequest): IO[SessionResponse] = IO(session)
   }
@@ -34,5 +33,4 @@ class UserControllerSpec extends BaseUnitTest with SessionFixture {
       loginResponse.status shouldBe Status.Ok
     }
   }
-
 }

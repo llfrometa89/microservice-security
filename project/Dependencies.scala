@@ -1,9 +1,7 @@
 import sbt._
 
 object Dependencies {
-
   object Versions {
-
     val catsVersion       = "2.0.0"
     val catsEffectVersion = "2.0.0"
     val scalaTestVersion  = "3.2.0-M1"
@@ -20,7 +18,6 @@ object Dependencies {
   }
 
   object Libraries {
-
     def circe(artifact: String): ModuleID = "io.circe" %% artifact % Versions.circeVersion
 
     lazy val cats                 = "org.typelevel" %% "cats-core" % Versions.catsVersion
@@ -44,5 +41,4 @@ object Dependencies {
     lazy val betterMonadicFor     = "com.olegpy" %% "better-monadic-for" % Versions.betterMonadicFor
     lazy val kindProjector        = "org.typelevel" %% "kind-projector" % Versions.kindProjector
   }
-
 }

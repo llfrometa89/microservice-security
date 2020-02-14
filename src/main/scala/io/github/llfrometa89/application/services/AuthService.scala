@@ -9,20 +9,15 @@ import io.github.llfrometa89.domain.gateways.UserGateway
 import io.github.llfrometa89.domain.repositories.ProfileRepository
 
 trait AuthService[F[_]] {
-
   def login(loginData: LoginRequest): F[SessionResponse]
 }
 
 object AuthService {
-
   def apply[F[_]](implicit ev: AuthService[F]): AuthService[F] = ev
-
 }
 
 trait AuthServiceInstances {
-
   implicit def instanceAuthService[F[_]: Sync: ProfileRepository: UserGateway] = new AuthService[F] {
-
     def login(loginData: LoginRequest): F[SessionResponse] =
       UserGateway[F]
         .login(loginData.email, loginData.password)

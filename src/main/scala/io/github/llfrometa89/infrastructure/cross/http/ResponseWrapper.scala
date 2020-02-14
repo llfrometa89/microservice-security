@@ -8,11 +8,9 @@ import org.http4s.EntityEncoder
 import org.http4s.circe.jsonEncoderOf
 
 object ResponseWrapper {
-
   case class MessageResponse(code: String, message: String)
 
   object MessageResponse {
-
     implicit val messageResponseEncoder: Encoder[MessageResponse]                            = deriveEncoder[MessageResponse]
     implicit def messageResponseEntityEncoder[F[_]: Sync]: EntityEncoder[F, MessageResponse] = jsonEncoderOf
   }
@@ -26,7 +24,6 @@ object ResponseWrapper {
   case class ResultResponse(messages: MessagesResponse)
 
   object MessagesResponse {
-
     def apply(error: MessageResponse): MessagesResponse =
       new MessagesResponse(List(error), warnings = List.empty[MessageResponse], linked = List.empty[MessageResponse])
 
@@ -38,12 +35,10 @@ object ResponseWrapper {
   }
 
   object ResultResponse {
-
     def apply(error: MessageResponse): ResultResponse        = new ResultResponse(MessagesResponse(error))
     def apply(errors: List[MessageResponse]): ResultResponse = new ResultResponse(MessagesResponse(errors))
 
     implicit val resultResponseEncoder: Encoder[ResultResponse]                                   = deriveEncoder[ResultResponse]
     implicit def resultResponseEntityEncoder[F[_]: Applicative]: EntityEncoder[F, ResultResponse] = jsonEncoderOf
   }
-
 }

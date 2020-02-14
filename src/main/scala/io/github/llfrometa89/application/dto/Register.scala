@@ -7,7 +7,6 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 
 object Register {
-
   case class RegisterRequest(
       username: String,
       password: String,
@@ -27,5 +26,4 @@ object Register {
     implicit val registerEncoder: Encoder[RegisterResponse]                            = deriveEncoder[RegisterResponse]
     implicit def registerEntityEncoder[F[_]: Sync]: EntityEncoder[F, RegisterResponse] = jsonEncoderOf
   }
-
 }

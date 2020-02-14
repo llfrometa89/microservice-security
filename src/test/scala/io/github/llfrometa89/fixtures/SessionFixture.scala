@@ -3,7 +3,6 @@ package io.github.llfrometa89.fixtures
 import io.github.llfrometa89.application.dto.Session.SessionResponse
 
 trait SessionFixture {
-
   val username = "example@exa.mple"
   val password = "aPassword"
 

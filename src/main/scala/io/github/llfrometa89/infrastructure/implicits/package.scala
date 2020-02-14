@@ -11,6 +11,5 @@ package object implicits
     with UserProfileMysqlRepositoryInstances
     with UserServiceInstances
     with AuthServiceInstances {
-
   object validated extends syntax.ValidatedSyntax
 }

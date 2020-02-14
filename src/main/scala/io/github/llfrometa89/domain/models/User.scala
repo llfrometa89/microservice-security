@@ -13,7 +13,6 @@ case class User(
 )
 
 object User {
-
   def apply(email: String, password: String, firstName: String, lastName: String, cellPhone: Option[String]): User =
     new User(
       email,

@@ -7,7 +7,6 @@ import cats.data.Validated._
 import io.github.llfrometa89.infrastructure.cross.validator.Validator.ValidationMessage
 
 object UserValidator {
-
   type ValidationResult[A] = ValidatedNec[ValidationMessage, A]
 
   def validateUser(
@@ -34,13 +33,11 @@ object UserValidator {
 
   private def validateLastName(lastName: String): ValidationResult[String] =
     if (lastName.matches("^[a-zA-Z]+$")) lastName.validNec else LastNameHasSpecialCharacters.invalidNec
-
 }
 
 case object UsernameHasSpecialCharacters extends ValidationMessage {
   def message: String = "Username cannot contain special characters."
   def code: String    = productPrefix
-
 }
 
 case object PasswordDoesNotMeetCriteria extends ValidationMessage {

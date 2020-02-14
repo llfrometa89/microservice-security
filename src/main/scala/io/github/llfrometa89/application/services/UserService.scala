@@ -12,19 +12,15 @@ import io.github.llfrometa89.infrastructure.cross.validator.Validator.Validation
 import io.github.llfrometa89.infrastructure.implicits.validated._
 
 trait UserService[F[_]] {
-
   def register(registerDto: RegisterRequest): F[RegisterResponse]
 }
 
 object UserService {
-
   def apply[F[_]](implicit ev: UserService[F]): UserService[F] = ev
 }
 
 trait UserServiceInstances {
-
   implicit def instanceUserService[F[_]: Sync: ProfileRepository: UserGateway] = new UserService[F] {
-
     def register(registerDto: RegisterRequest): F[RegisterResponse] =
       for {
         validUser <- validateUser(registerDto: RegisterRequest)

@@ -14,9 +14,7 @@ import scala.jdk.CollectionConverters._
 import UserCognitoGatewayInstances._
 
 trait UserCognitoGatewayInstances {
-
   implicit def instanceUserGateway[F[_]: Sync: HasAwsConfig] = new UserGateway[F] {
-
     def register(user: User): F[User] = {
       (for {
         config  <- ask[F, AwsConfig]
@@ -84,7 +82,6 @@ trait UserCognitoGatewayInstances {
     }
 
     private def clientBuilder(config: AwsConfig): F[AWSCognitoIdentityProvider] = {
-
       val credentials         = new BasicAWSCredentials(config.accessKey, config.secretKey)
       val credentialsProvider = new AWSStaticCredentialsProvider(credentials)
 
@@ -120,7 +117,6 @@ trait UserCognitoGatewayInstances {
 }
 
 object UserCognitoGatewayInstances {
-
   final val EmailField                       = "email"
   final val NameField                        = "name"
   final val FamilyNameField                  = "family_name"

@@ -13,15 +13,11 @@ import cats.implicits._
 import org.http4s.implicits._
 
 object Main extends IOApp {
-
   def run(args: List[String]): IO[ExitCode] = WebServer.run[IO].compile.drain.as(ExitCode.Success)
-
 }
 
 object WebServer {
-
   def run[F[_]: ConcurrentEffect](implicit T: Timer[F]): Stream[F, Nothing] = {
-
     val userRoute = UserController[F]().routes(UserHttpErrorHandler[F])
     val authRoute = AuthController[F]().routes(UserHttpErrorHandler[F])
     val routes    = userRoute <+> authRoute

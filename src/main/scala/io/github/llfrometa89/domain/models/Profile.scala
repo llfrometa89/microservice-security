@@ -13,7 +13,6 @@ case class Profile(
 )
 
 object Profile {
-
   def fromUser(user: User): Profile =
     Profile(
       id = UUIDGenerator.generate,

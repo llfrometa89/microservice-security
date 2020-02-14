@@ -7,7 +7,6 @@ import pureconfig.ConfigSource
 import pureconfig.generic.auto._
 
 object ConfigFactory {
-
   case class AppConfig(http: HttpConfig, aws: AwsConfig)
   case class HttpConfig(server: HttpServerConfig)
   case class HttpServerConfig(host: String, port: Int)
@@ -24,7 +23,6 @@ object ConfigFactory {
 }
 
 trait ConfigFactoryInstances {
-
   import ConfigFactory._
 
   implicit def configReader[F[_]: Sync]: HasAppConfig[F] =

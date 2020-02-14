@@ -7,10 +7,8 @@ import org.http4s.Response
 import io.github.llfrometa89.infrastructure.cross.http.ResponseWrapper._
 
 object UserHttpErrorHandler {
-
   def apply[F[_]: MonadError[?[_], UserError]]: HttpErrorHandler[F, UserError] =
     new RoutesHttpErrorHandler[F, UserError] {
-
       val A = implicitly
 
       val handler: UserError => F[Response[F]] = {

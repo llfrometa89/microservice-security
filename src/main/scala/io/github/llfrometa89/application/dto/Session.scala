@@ -8,7 +8,6 @@ import org.http4s.{EntityDecoder, EntityEncoder}
 import org.http4s.circe.{jsonEncoderOf, jsonOf}
 
 object Session {
-
   def fromSession(session: SessionModel): SessionResponse =
     SessionResponse(session.accessToken, session.refreshToken, session.username, session.tokenType, session.expiresIn)
 
@@ -21,7 +20,6 @@ object Session {
   )
 
   object SessionResponse {
-
     implicit val sessionEncoder: Encoder[SessionResponse]                            = deriveEncoder[SessionResponse]
     implicit val sessionDecoder: Decoder[SessionResponse]                            = deriveDecoder[SessionResponse]
     implicit def sessionEntityEncoder[F[_]: Sync]: EntityEncoder[F, SessionResponse] = jsonEncoderOf

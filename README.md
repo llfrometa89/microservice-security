@@ -12,7 +12,9 @@ export AWS_ACCESS_KEY=<AWS_ACCESS_KEY>
 export AWS_REGION=<AWS_REGION>
 export AWS_COGNITO_USER_POOL_ID=<AWS_COGNITO_USER_POOL_ID>
 ```
+
   - Run at terminal
 ```  
 $ source .env && sbt run  
 ```
+

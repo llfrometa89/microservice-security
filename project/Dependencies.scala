@@ -14,9 +14,9 @@ object Dependencies {
     val logbackVersion    = "1.2.3"
     val awsSdkVersion     = "1.11.656"
     val pureConfigVersion = "0.12.1"
-    val kindProjector     = "0.9.8"
-    val betterMonadicFor  = "0.3.0-M4"
-    val catsMeowMtl       = "0.2.0"
+    val kindProjector     = "0.10.3"
+    val betterMonadicFor  = "0.3.1"
+    val catsMeowMtl       = "0.3.0-M1"
   }
 
   object Libraries {
@@ -41,8 +41,8 @@ object Dependencies {
     lazy val pureConfig           = "com.github.pureconfig" %% "pureconfig" % Versions.pureConfigVersion
     lazy val scalaTest            = "org.scalatest" %% "scalatest" % Versions.scalaTestVersion
     lazy val scalaCheck           = "org.scalacheck" %% "scalacheck" % Versions.scalaCheckVersion
-    lazy val kindProjector        = "org.spire-math" %% "kind-projector" % Versions.kindProjector
     lazy val betterMonadicFor     = "com.olegpy" %% "better-monadic-for" % Versions.betterMonadicFor
+    lazy val kindProjector        = "org.typelevel" %% "kind-projector" % Versions.kindProjector
   }
 
 }

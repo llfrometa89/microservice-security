@@ -18,13 +18,6 @@ jobs:
       - run:
           name: Run test
           command: ./sbt clean test
-#          command: ./sbt clean coverage test
-#      - run:
-#          name: Run coverage report
-#          command: ./sbt coverageReport
-#      - run:
-#          name: Run codacy coverage
-#          command: ./sbt codacyCoverage
       - run:
           name: Run stage
           command: ./sbt stage
@@ -45,43 +38,11 @@ jobs:
           root: .
           paths:
             - ./target/universal/stage
-#            - Dockerfile
-#            - init.sh
-#            - application.yml.ctmpl
-#  publish:
-#    executor: publisher
-#    working_directory: ~/locations
-#    steps:
-#      - attach_workspace:
-#          at: .
-#      - setup_remote_docker
-#      - run:
-#          name: build, login & upload docker image to gcr
-#          command: |
-#            REF=${CIRCLE_TAG:-$CIRCLE_BRANCH}
-#            echo $GCLOUD_GCR_ADMIN_KEY | docker login -u _json_key --password-stdin https://$GCLOUD_GCR_HOSTNAME
-#            docker build -t $GCLOUD_GCR_HOSTNAME/$CIRCLE_PROJECT_REPONAME:$REF .
-#            docker push $GCLOUD_GCR_HOSTNAME/$CIRCLE_PROJECT_REPONAME:$REF
 workflows:
   version: 2
   locations:
-    # build: coverage + stage
-    # publish: push image to gcr
     jobs:
       - build:
-          # executed: always (PR, branches, master, release)
-          # ignored: never
           filters:
             tags:
               only: /.*/
-#      - publish:
-#          # executed: branches, master, release
-#          # ignored: PR
-#          requires:
-#            - build
-#          filters:
-#            branches:
-#              ignore:
-#                - /pull\/.*/
-#            tags:
-#              only: /.*/

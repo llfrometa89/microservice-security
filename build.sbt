@@ -21,11 +21,10 @@ lazy val commonScalacOptions = Seq(
 )
 
 libraryDependencies ++= Seq(
-//  compilerPlugin(Libraries.kindProjector),
   compilerPlugin(Libraries.betterMonadicFor)
 )
 
-addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full)
+addCompilerPlugin(Libraries.kindProjector cross CrossVersion.full)
 
 libraryDependencies ++= Seq(
   Libraries.cats,

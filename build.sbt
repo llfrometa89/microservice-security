@@ -64,3 +64,5 @@ libraryDependencies ++= Seq(
 )
 
 scalacOptions ++= commonScalacOptions
+
+enablePlugins(JavaAppPackaging)

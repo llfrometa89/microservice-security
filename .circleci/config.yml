@@ -30,12 +30,6 @@ jobs:
       - run:
           name: Run stage
           command: ./sbt stage
-      - run:
-          name: Before cache delete .lock files
-          command: find ../.sbt -name "*.lock" | xargs rm -v
-      - run:
-          name: Before cache delete ivydata properties file
-          command: find ../.ivy2 -name "ivydata-*.properties" | xargs rm -v
       - save_cache:
           paths:
             - ../.m2

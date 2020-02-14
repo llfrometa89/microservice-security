@@ -16,8 +16,14 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "build.sbt" }}-{{ checksum "./project/build.properties" }}-{{ checksum "./project/plugins.sbt" }}-{{ checksum "./project/Dependencies.scala" }}
       - run:
-          name: Run test
-          command: ./sbt clean test
+          name: Run clean coverage test
+          command: ./sbt clean coverage test
+      - run:
+          name: Run coverage report
+          command: ./sbt coverageReport
+      - run:
+          name: Run codacy coverage
+          command: ./sbt codacyCoverage
       - run:
           name: Run stage
           command: ./sbt stage

@@ -11,10 +11,9 @@ import io.github.llfrometa89.domain.models.{Session, User}
 import io.github.llfrometa89.infrastructure.configurations.ConfigFactory._
 import com.amazonaws.services.cognitoidp.model.NotAuthorizedException
 import scala.jdk.CollectionConverters._
+import UserCognitoGatewayInstances._
 
 trait UserCognitoGatewayInstances {
-
-  import UserCognitoGatewayInstances._
 
   implicit def instanceUserGateway[F[_]: Sync: HasAwsConfig] = new UserGateway[F] {
 

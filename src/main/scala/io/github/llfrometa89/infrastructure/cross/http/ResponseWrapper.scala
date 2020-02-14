@@ -20,7 +20,8 @@ object ResponseWrapper {
   case class MessagesResponse(
       errors: List[MessageResponse],
       warnings: List[MessageResponse],
-      linked: List[MessageResponse])
+      linked: List[MessageResponse]
+  )
 
   case class ResultResponse(messages: MessagesResponse)
 

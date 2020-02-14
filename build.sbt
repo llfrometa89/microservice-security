@@ -6,40 +6,25 @@ organization := "io.github.llfrometa89"
 
 version := "0.1.0"
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.13.1"
 
 lazy val commonScalacOptions = Seq(
-  "-deprecation",
+  "-feature",
+  "-language:higherKinds",
   "-encoding",
   "UTF-8",
-  "-feature",
-  "-language:existentials",
-  "-language:higherKinds",
-  "-language:implicitConversions",
-  "-language:experimental.macros",
-  "-Ypartial-unification",
+  "-deprecation",
   "-unchecked",
-  "-Xfatal-warnings",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-value-discard",
-  "-Xfuture",
-  "-Xlog-reflective-calls",
-  "-Ywarn-inaccessible",
-  "-Ypatmat-exhaust-depth",
-  "20",
-  "-Ydelambdafy:method",
-  "-Xmax-classfile-name",
-  "100",
-  "-opt:l:inline",
-  "-opt-inline-from:**"
+  "-Wunused:imports,patvars,locals",
+  "-Wnumeric-widen",
+  "-Xlint:-unused"
 )
 
 libraryDependencies ++= Seq(
-  compilerPlugin(Libraries.kindProjector),
   compilerPlugin(Libraries.betterMonadicFor)
 )
+
+addCompilerPlugin(Libraries.kindProjector cross CrossVersion.full)
 
 libraryDependencies ++= Seq(
   Libraries.cats,
@@ -58,9 +43,10 @@ libraryDependencies ++= Seq(
   Libraries.awsJavaSdkCore,
   Libraries.awsJavaSdkCognitoidp,
   Libraries.pureConfig,
-  Libraries.scalaTest        % Test,
-  Libraries.scalaCheck       % Test,
-  "org.springframework.data" % "spring-data-jpa" % "2.2.0.RELEASE"
+  Libraries.scalaTest  % Test,
+  Libraries.scalaCheck % Test
 )
 
 scalacOptions ++= commonScalacOptions
+
+enablePlugins(JavaAppPackaging)

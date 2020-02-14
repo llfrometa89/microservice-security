@@ -13,7 +13,8 @@ object Register {
       password: String,
       firstName: String,
       lastName: String,
-      cellPhone: Option[String])
+      cellPhone: Option[String]
+  )
 
   case class RegisterResponse(profileId: String)
 

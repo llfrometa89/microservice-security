@@ -10,22 +10,10 @@ import io.github.llfrometa89.domain.models.User.{UserAlreadyExists, UserNotAutho
 import io.github.llfrometa89.domain.models.{Session, User}
 import io.github.llfrometa89.infrastructure.configurations.ConfigFactory._
 import com.amazonaws.services.cognitoidp.model.NotAuthorizedException
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
+import UserCognitoGatewayInstances._
 
 trait UserCognitoGatewayInstances {
-
-  final val EMAIL_FIELD                          = "email"
-  final val NAME_FIELD                           = "name"
-  final val FAMILY_NAME_FIELD                    = "family_name"
-  final val PHONE_NUMBER_FIELD                   = "phone_number"
-  final val EMAIL_VERIFIED_FIELD                 = "email_verified"
-  final val EMPTY                                = "email_verified"
-  final val DEFAULT_EMAIL_VERIFIED_VALUE         = "true"
-  final val MESSAGE_ACTION_VALUE                 = "SUPPRESS"
-  final val USERNAME_FIELD                       = "USERNAME"
-  final val PASSWORD_FIELD                       = "PASSWORD"
-  final val NEW_PASSWORD_FIELD                   = "NEW_PASSWORD"
-  final val NEW_PASSWORD_REQUIRED_CHALLENGE_NAME = "NEW_PASSWORD_REQUIRED"
 
   implicit def instanceUserGateway[F[_]: Sync: HasAwsConfig] = new UserGateway[F] {
 
@@ -49,17 +37,18 @@ trait UserCognitoGatewayInstances {
         authResp         <- Sync[F].delay(client.adminInitiateAuth(authReq))
         authChallengeReq <- authChallengeRequestBuilder(username, password, authResp, config)
         authResult <- Sync[F]
-          .pure(authResp.getChallengeName == NEW_PASSWORD_REQUIRED_CHALLENGE_NAME)
+          .pure(authResp.getChallengeName == NewPasswordRequiredChallengeName)
           .ifM(
             Sync[F].delay(client.adminRespondToAuthChallenge(authChallengeReq).getAuthenticationResult),
-            Sync[F].pure(authResp.getAuthenticationResult))
-      } yield
-        Session(
-          authResult.getAccessToken,
-          authResult.getRefreshToken,
-          username,
-          authResult.getTokenType,
-          authResult.getExpiresIn.toLong)
+            Sync[F].pure(authResp.getAuthenticationResult)
+          )
+      } yield Session(
+        authResult.getAccessToken,
+        authResult.getRefreshToken,
+        username,
+        authResult.getTokenType,
+        authResult.getExpiresIn.toLong
+      )
 
       computation.recoverWith {
         case _: NotAuthorizedException => Sync[F].raiseError(UserNotAuthorized(username))
@@ -73,21 +62,25 @@ trait UserCognitoGatewayInstances {
           .withAuthFlow(AuthFlowType.ADMIN_NO_SRP_AUTH)
           .withClientId(config.cognito.appClientId)
           .withUserPoolId(config.cognito.userPoolId)
-          .withAuthParameters(Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password).asJava))
+          .withAuthParameters(Map(UsernameField -> username, PasswordField -> password).asJava)
+      )
 
     private def authChallengeRequestBuilder(
         username: String,
         password: String,
         authResp: AdminInitiateAuthResult,
-        config: AwsConfig): F[AdminRespondToAuthChallengeRequest] = {
+        config: AwsConfig
+    ): F[AdminRespondToAuthChallengeRequest] = {
       Sync[F].delay(
         new AdminRespondToAuthChallengeRequest()
           .withChallengeName(ChallengeNameType.NEW_PASSWORD_REQUIRED)
           .withChallengeResponses(
-            Map(USERNAME_FIELD -> username, PASSWORD_FIELD -> password, NEW_PASSWORD_FIELD -> password).asJava)
+            Map(UsernameField -> username, PasswordField -> password, NewPasswordField -> password).asJava
+          )
           .withClientId(config.cognito.appClientId)
           .withUserPoolId(config.cognito.userPoolId)
-          .withSession(authResp.getSession))
+          .withSession(authResp.getSession)
+      )
     }
 
     private def clientBuilder(config: AwsConfig): F[AWSCognitoIdentityProvider] = {
@@ -100,7 +93,8 @@ trait UserCognitoGatewayInstances {
           .standard()
           .withCredentials(credentialsProvider)
           .withRegion(config.region)
-          .build())
+          .build()
+      )
     }
 
     private def userRequestBuilder(config: AwsConfig, user: User): F[AdminCreateUserRequest] =
@@ -110,16 +104,32 @@ trait UserCognitoGatewayInstances {
           .withUsername(user.username)
           .withUserAttributes(
             new AttributeType()
-              .withName(EMAIL_FIELD)
+              .withName(EmailField)
               .withValue(user.email),
-            new AttributeType().withName(NAME_FIELD).withValue(user.firstName),
-            new AttributeType().withName(FAMILY_NAME_FIELD).withValue(user.lastName),
-            new AttributeType().withName(PHONE_NUMBER_FIELD).withValue(user.cellPhone.getOrElse(EMPTY)),
-            new AttributeType().withName(EMAIL_VERIFIED_FIELD).withValue(DEFAULT_EMAIL_VERIFIED_VALUE)
+            new AttributeType().withName(NameField).withValue(user.firstName),
+            new AttributeType().withName(FamilyNameField).withValue(user.lastName),
+            new AttributeType().withName(PhoneNumberField).withValue(user.cellPhone.getOrElse("")),
+            new AttributeType().withName(EmailVerifiedField).withValue(DefaultEmailVerifiedValue)
           )
           .withTemporaryPassword(user.password)
-          .withMessageAction(MESSAGE_ACTION_VALUE)
+          .withMessageAction(MessageActionValue)
           .withDesiredDeliveryMediums(DeliveryMediumType.EMAIL)
-          .withForceAliasCreation(false))
+          .withForceAliasCreation(false)
+      )
   }
+}
+
+object UserCognitoGatewayInstances {
+
+  final val EmailField                       = "email"
+  final val NameField                        = "name"
+  final val FamilyNameField                  = "family_name"
+  final val PhoneNumberField                 = "phone_number"
+  final val EmailVerifiedField               = "email_verified"
+  final val DefaultEmailVerifiedValue        = "true"
+  final val UsernameField                    = "USERNAME"
+  final val PasswordField                    = "PASSWORD"
+  final val NewPasswordField                 = "NEW_PASSWORD"
+  final val MessageActionValue               = "SUPPRESS"
+  final val NewPasswordRequiredChallengeName = "NEW_PASSWORD_REQUIRED"
 }

@@ -12,5 +12,6 @@ trait SessionFixture {
     refreshToken = "aRefreshToken",
     username = username,
     tokenType = "aTokenType",
-    expiresIn = 111)
+    expiresIn = 111
+  )
 }

@@ -9,7 +9,8 @@ case class Profile(
     username: String,
     firstName: String,
     lastName: String,
-    cellPhone: Option[String])
+    cellPhone: Option[String]
+)
 
 object Profile {
 

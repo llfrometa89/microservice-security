@@ -17,7 +17,8 @@ object Session {
       refreshToken: String,
       username: String,
       tokenType: String,
-      expiresIn: Long)
+      expiresIn: Long
+  )
 
   object SessionResponse {
 

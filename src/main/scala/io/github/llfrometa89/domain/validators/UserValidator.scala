@@ -17,9 +17,8 @@ object UserValidator {
       cellPhone: Option[String]
   ): ValidationResult[User] =
     (validateEmail(email), validatePassword(password), validateFirstName(firstName), validateLastName(lastName))
-      .mapN(
-        (validatedEmail, validatedPassword, validatedFirstName, validatedLastName) =>
-          User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName, cellPhone)
+      .mapN((validatedEmail, validatedPassword, validatedFirstName, validatedLastName) =>
+        User(validatedEmail, validatedPassword, validatedFirstName, validatedLastName, cellPhone)
       )
 
   private def validateEmail(userName: String): ValidationResult[String] =
